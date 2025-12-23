@@ -17,7 +17,7 @@ Unlike standard JWT expiration (`exp`), this middleware tracks *last access time
 - **JWT generator service**: Issue tokens with `jti` claim for inactivity tracking.  
 
 ---
-## 🚀 Usage
+## ✈️ Usage
 Register to service
 
 ```csharp
@@ -40,7 +40,7 @@ Always enforce both absolute expiration (exp) and inactivity threshold.
 - Keep middleware lightweight and stateless aside from Redis.
 
 ---
-## 🤝 Contributing
+## 🎯 Contributing
 Contributions are welcome!
 
 - Fork the repo
@@ -50,7 +50,25 @@ Contributions are welcome!
 * Please ensure all tests pass before submitting.
 * For major changes, open an issue first to discuss what you’d like to change.
 ---
+## 🛠 Project Structure
+```csharp
+JwtInactivityMiddleware/
+ ├── JwtTokenRotationMiddleware.cs   # Core middleware logic
+ ├── JwtTokenRotationOptions.cs      # Configurable options
+ ├── JwtTokenGenerator.cs            # Token generator service
+ ├── JwtInactivityExtensions.cs      # DI + middleware registration
+ ├── JwtInactivityMiddleware.csproj  # Library project file
 
+JwtInactivityMiddleware.Sample/
+ ├── Program.cs                      # Demo API setup
+ ├── Controllers/AuthController.cs   # Example login + token issuance
+ ├── JwtInactivityMiddleware.Sample.csproj
+
+JwtInactivityMiddleware.Tests/
+ ├── MiddlewareTests.cs              # Unit tests for inactivity logic
+ ├── JwtInactivityMiddleware.Tests.csproj
+```
+---
 ## 📦 Installation
 
 Add the NuGet package (once published):
