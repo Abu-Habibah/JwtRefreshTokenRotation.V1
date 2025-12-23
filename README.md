@@ -59,10 +59,10 @@ JwtTokenMiddleware/
  ├── JwtInactivityExtensions.cs      # DI + middleware registration
  ├── JwtTokenMiddleware.csproj       # Library project file
 
-JwtInactivityMiddleware.Sample/
+JwtTokenMiddleware.Sample/
  ├── Program.cs                      # Demo API setup
  ├── Controllers/AuthController.cs   # Example login + token issuance
- ├── JwtInactivityMiddleware.Sample.csproj
+ ├── JwtTokenMiddleware.Sample.csproj
 
 JwtTokenMiddleware.Test/
  ├── JwtTokenRotationMiddlewareTests.cs              # Unit tests for inactivity logic
