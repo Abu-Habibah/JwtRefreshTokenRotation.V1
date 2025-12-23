@@ -10,7 +10,7 @@ builder.Services.AddJwtTokenRotation(new JwtTokenRotationOptions
     InactivityThreshold = 10,
     TokenExpiration = 120,
     RedisConnectionString = "localhost:6379",
-    JwtSecret = builder.Configuration["Jwt:Secret"]
+    JwtSecret = "YourSuperSecretKeyHere"
 });
 
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
