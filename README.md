@@ -52,21 +52,21 @@ Contributions are welcome!
 ---
 ## 🛠 Project Structure
 ```csharp
-JwtInactivityMiddleware/
+JwtTokenMiddleware/
  ├── JwtTokenRotationMiddleware.cs   # Core middleware logic
  ├── JwtTokenRotationOptions.cs      # Configurable options
  ├── JwtTokenGenerator.cs            # Token generator service
  ├── JwtInactivityExtensions.cs      # DI + middleware registration
- ├── JwtInactivityMiddleware.csproj  # Library project file
+ ├── JwtTokenMiddleware.csproj       # Library project file
 
 JwtInactivityMiddleware.Sample/
  ├── Program.cs                      # Demo API setup
  ├── Controllers/AuthController.cs   # Example login + token issuance
  ├── JwtInactivityMiddleware.Sample.csproj
 
-JwtInactivityMiddleware.Tests/
- ├── MiddlewareTests.cs              # Unit tests for inactivity logic
- ├── JwtInactivityMiddleware.Tests.csproj
+JwtTokenMiddleware.Test/
+ ├── JwtTokenRotationMiddlewareTests.cs              # Unit tests for inactivity logic
+ ├── JwtTokenMiddleware.Test.csproj
 ```
 ---
 ## 📦 Installation
