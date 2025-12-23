@@ -1,7 +1,8 @@
-﻿using System.IdentityModel.Tokens.Jwt;
+﻿using Microsoft.IdentityModel.Tokens;
+using StackExchange.Redis;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Microsoft.IdentityModel.Tokens;
 
 namespace JwtTokenMiddleware;
 
@@ -34,6 +35,14 @@ public class JwtTokenGenerator
             claims: claims,
             expires: DateTime.UtcNow.AddMinutes(_options.TokenExpiration), 
             signingCredentials: credentials
+        );
+
+        //TODO: add token jti to Redis with initial last access time?
+        var redis = ConnectionMultiplexer.Connect(_options.RedisConnectionString);
+        redis.GetDatabase().StringSet(
+            token.Id, 
+            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(), 
+            TimeSpan.FromMinutes(_options.InactivityThreshold)
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);

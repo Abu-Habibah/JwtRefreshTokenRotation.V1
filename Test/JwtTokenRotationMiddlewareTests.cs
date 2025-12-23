@@ -10,9 +10,9 @@ public class JwtTokenRotationMiddlewareTests
 {
     private readonly JwtTokenRotationOptions _options = new()
     {
-        JwtSecret = "test-secret-key",
+        JwtSecret = "u1X9zPqQe7vNf4sTj8wYk2rLm5aB0cVdGhJxZpQnR3sUoWmYt",
         RedisConnectionString = "localhost:6379",
-        InactivityThreshold = 2 // short threshold for testing
+        InactivityThreshold = 1 // short threshold for testing
     };
 
     private string GenerateJwt(string userId)
@@ -20,13 +20,9 @@ public class JwtTokenRotationMiddlewareTests
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
-        var token = new JwtSecurityToken(
-            claims: new[] { new System.Security.Claims.Claim(JwtRegisteredClaimNames.Sub, userId) },
-            expires: DateTime.UtcNow.AddMinutes(5),
-            signingCredentials: credentials
-        );
+        JwtTokenGenerator generator = new JwtTokenGenerator(_options);
+        return generator.GenerateToken(userId);
 
-        return new JwtSecurityTokenHandler().WriteToken(token);
     }
 
     [Fact]
@@ -66,7 +62,7 @@ public class JwtTokenRotationMiddlewareTests
         await middleware.InvokeAsync(context);
 
         // Wait beyond inactivity threshold
-        await Task.Delay(3000);
+        await Task.Delay(6500);
 
         var context2 = new DefaultHttpContext();
         context2.Request.Headers["Authorization"] = $"Bearer {token}";

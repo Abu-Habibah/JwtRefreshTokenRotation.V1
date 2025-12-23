@@ -44,7 +44,7 @@ public class JwtTokenRotationMiddleware
                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret)),
                 ValidateIssuer = false,
                 ValidateAudience = false,
-                ValidateLifetime = true
+                ValidateLifetime = true                
             };
 
             handler.ValidateToken(token, validationParameters, out _);
@@ -64,6 +64,14 @@ public class JwtTokenRotationMiddleware
                 }
             }
 
+            //TODO: if jti is not found in redis, consider it invalid/expired
+            // jti should be added to redis when token is generated in JwtTokenGenerator
+            else
+            {
+                context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+                await context.Response.WriteAsync("Invalid token");
+                return;
+            }
             // Update last access and set TTL
             await _redis.StringSetAsync(jti, now.ToString(), _inactivityThreshold);
 
