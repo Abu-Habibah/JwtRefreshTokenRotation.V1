@@ -29,10 +29,10 @@ public class JwtTokenGenerator
             claims.AddRange(additionalClaims);
 
         var token = new JwtSecurityToken(
-            issuer: _options.Issuer,               // can be set via options
-            audience: _options.Audience,       // can be set via options
+            issuer: _options.Issuer,             
+            audience: _options.Audience, 
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1), // absolute expiration
+            expires: DateTime.UtcNow.AddMinutes(_options.TokenExpiration), 
             signingCredentials: credentials
         );
 

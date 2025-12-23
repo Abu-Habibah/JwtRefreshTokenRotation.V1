@@ -13,12 +13,12 @@ public class JwtTokenRotationMiddleware
     private readonly IDatabase _redis;
     private readonly TimeSpan _inactivityThreshold = TimeSpan.FromMinutes(15);
     private readonly JwtTokenRotationOptions _options;
-    public JwtTokenRotationMiddleware(RequestDelegate next, IConnectionMultiplexer redis, JwtTokenRotationOptions options) 
+    public JwtTokenRotationMiddleware(RequestDelegate next, IConnectionMultiplexer redis, JwtTokenRotationOptions options)
     {
-        _next = next; 
-        _redis = redis.GetDatabase(); 
-        _options = options; 
-        _inactivityThreshold=_options.InactivityThreshold;
+        _next = next;
+        _redis = redis.GetDatabase();
+        _options = options;
+        _inactivityThreshold = TimeSpan.FromMinutes(_options.InactivityThreshold);
     }
 
     public async Task InvokeAsync(HttpContext context)

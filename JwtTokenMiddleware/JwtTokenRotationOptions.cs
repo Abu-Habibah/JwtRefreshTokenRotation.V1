@@ -3,23 +3,23 @@
 public class JwtTokenRotationOptions
 {
     /// <summary>
-    /// Gets or sets the duration of inactivity that must elapse before a user is considered inactive.
+    /// Gets or sets the duration in minutes of inactivity that must elapse before a user is considered inactive.
     /// </summary>
     /// <remarks>
     /// This threshold is used to determine when to expire authentication tokens due to inactivity.
     /// If a user does not make any requests within this time frame, 
     /// their token will be considered expired and they will need to re-authenticate.
     /// </remarks>
-    public TimeSpan InactivityThreshold { get; set; } = TimeSpan.FromMinutes(10);
+    public int InactivityThreshold { get; set; } = 10;
 
     /// <summary>
-    /// Gets or sets the duration for which an authentication token remains valid before expiring.
+    /// Gets or sets the duration in minutes for which an authentication token remains valid before expiring.
     /// </summary>
     /// <remarks> 
     /// Token expiration is based on absolute time since issuance, regardless of activity.
     /// This should be set longer than the inactivity threshold to allow for token refreshes.
     /// </remarks>
-    public TimeSpan TokenExpiration { get; set; } = TimeSpan.FromMinutes(120);
+    public int TokenExpiration { get; set; } = 120;
 
     /// <summary>
     /// Gets or sets the connection string used to connect to the Redis server.

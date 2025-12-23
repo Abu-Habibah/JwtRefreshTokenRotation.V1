@@ -13,7 +13,7 @@ public static class JwtTokenRotationExtension
         return services;
     }
 
-    public static IApplicationBuilder UseJwtJwtTokenRotation(this IApplicationBuilder app)
+    public static IApplicationBuilder UseJwtTokenRotation(this IApplicationBuilder app)
     {
         return app.UseMiddleware<JwtTokenRotationMiddleware>();
     }
