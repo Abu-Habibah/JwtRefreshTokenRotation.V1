@@ -56,7 +56,7 @@ JwtTokenMiddleware/
  ├── JwtTokenRotationMiddleware.cs   # Core middleware logic
  ├── JwtTokenRotationOptions.cs      # Configurable options
  ├── JwtTokenGenerator.cs            # Token generator service
- ├── JwtInactivityExtensions.cs      # DI + middleware registration
+ ├── JwtTokenRotationExtension.cs      # DI + middleware registration
  ├── JwtTokenMiddleware.csproj       # Library project file
 
 JwtTokenMiddleware.Sample/
