@@ -68,6 +68,32 @@ JwtTokenMiddleware.Test/
  ├── JwtTokenRotationMiddlewareTests.cs              # Unit tests for inactivity logic
  ├── JwtTokenMiddleware.Test.csproj
 ```
+----
+
+## 🔌Sequence Diagram
+```csharp
+User                AuthController          JwtTokenGenerator        Redis                Middleware
+ |                        |                        |                   |                        |
+ |--- Login Request ----->|                        |                   |                        |
+ |                        |--- GenerateTokenAsync->|                   |                        |
+ |                        |                        |--- Create JWT ----|                        |
+ |                        |                        |--- Store jti,lastAccess,TTL=TokenExpiration->|
+ |                        |<-- JWT Token ----------|                   |                        |
+ |<-- Token Response -----|                        |                   |                        |
+ |                                                                                              |
+ |--- API Request -------->------------------------>-------------------|----------------------->|
+ |                        |                        |                   |                        |
+ |                        |                        |                   |--- Get jti,lastAccess->|
+ |                        |                        |                   |<-- lastAccess,TTL -----|
+ |                        |                        |                   |                        |
+ |                        |                        |                   |--- Compare inactivity--|
+ |                        |                        |                   |--- If expired -> 401 --|
+ |                        |                        |                   |                        |
+ |                        |                        |                   |--- If valid: update lastAccess, TTL=remainingLifetime->|
+ |                        |                        |                   |                        |
+ |<-- Response (200/401)--|                        |                   |                        |
+
+```
 ---
 ## 📦 Installation
 
