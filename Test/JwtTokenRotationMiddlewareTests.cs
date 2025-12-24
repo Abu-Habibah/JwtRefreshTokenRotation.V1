@@ -12,63 +12,60 @@ public class JwtTokenRotationMiddlewareTests
     {
         JwtSecret = "u1X9zPqQe7vNf4sTj8wYk2rLm5aB0cVdGhJxZpQnR3sUoWmYt",
         RedisConnectionString = "localhost:6379",
-        InactivityThreshold = 1 // short threshold for testing
+        InactivityThreshold = 1 // 1 minute for testing
     };
 
-    private string GenerateJwt(string userId)
+    private async Task<(string jwtToken, ConnectionMultiplexer redis)> GenerateJwtAsync(string userId)
     {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
+        var redis = ConnectionMultiplexer.Connect(_options.RedisConnectionString);
+        var generator = new JwtTokenGenerator(_options, redis);
+        return (await generator.GenerateTokenAsync(userId), redis);
+    }
 
-        JwtTokenGenerator generator = new JwtTokenGenerator(_options);
-        return generator.GenerateTokenAsync(userId);
-
+    /// <summary>
+    /// Helper to simulate a request with a given token.
+    /// </summary>
+    private async Task<int> InvokeWithTokenAsync(JwtTokenRotationMiddleware middleware, string token)
+    {
+        var context = new DefaultHttpContext();
+        context.Request.Headers["Authorization"] = $"Bearer {token}";
+        await middleware.InvokeAsync(context);
+        return context.Response.StatusCode;
     }
 
     [Fact]
     public async Task ValidToken_ShouldPassMiddleware()
     {
-        var redis = ConnectionMultiplexer.Connect(_options.RedisConnectionString);
+        var r = await GenerateJwtAsync("user123");
         var middleware = new JwtTokenRotationMiddleware(
             async (ctx) => ctx.Response.StatusCode = 200,
-            redis,
+            r.redis,
             _options
         );
 
-        var context = new DefaultHttpContext();
-        var token = GenerateJwt("user123");
-        context.Request.Headers["Authorization"] = $"Bearer {token}";
-
-        await middleware.InvokeAsync(context);
-
-        Assert.Equal(200, context.Response.StatusCode);
+        var statusCode = await InvokeWithTokenAsync(middleware, r.jwtToken);
+        Assert.Equal(200, statusCode);
     }
 
     [Fact]
     public async Task ExpiredByInactivity_ShouldReturn401()
     {
-        var redis = ConnectionMultiplexer.Connect(_options.RedisConnectionString);
+        var r = await GenerateJwtAsync("user123");
         var middleware = new JwtTokenRotationMiddleware(
             async (ctx) => ctx.Response.StatusCode = 200,
-            redis,
+            r.redis,
             _options
         );
 
-        var context = new DefaultHttpContext();
-        var token = GenerateJwt("user123");
-        context.Request.Headers["Authorization"] = $"Bearer {token}";
-
         // First request initializes last access
-        await middleware.InvokeAsync(context);
+        var statusCode1 = await InvokeWithTokenAsync(middleware, r.jwtToken);
+        Assert.Equal(200, statusCode1);
 
-        // Wait beyond inactivity threshold
-        await Task.Delay(6500);
+        // Wait beyond inactivity threshold (slightly over 1 minute)
+        await Task.Delay(TimeSpan.FromMinutes(1.1));
 
-        var context2 = new DefaultHttpContext();
-        context2.Request.Headers["Authorization"] = $"Bearer {token}";
-
-        await middleware.InvokeAsync(context2);
-
-        Assert.Equal(401, context2.Response.StatusCode);
+        // Second request should fail
+        var statusCode2 = await InvokeWithTokenAsync(middleware, r.jwtToken);
+        Assert.Equal(401, statusCode2);
     }
 }

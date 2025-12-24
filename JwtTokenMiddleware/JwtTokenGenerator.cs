@@ -41,7 +41,7 @@ public class JwtTokenGenerator
 
         //TODO: add token jti to Redis with initial last access time?
         bool set = await _redis.StringSetAsync(token.Id,
-                                               DateTime.UtcNow.ToString(),
+                                               DateTimeOffset.UtcNow.ToUnixTimeMilliseconds(),
                                                _options.TokenExpirationSpan);
 
         if (!set)
