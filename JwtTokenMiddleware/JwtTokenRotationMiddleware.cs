@@ -11,14 +11,14 @@ public class JwtTokenRotationMiddleware
 {
     private readonly RequestDelegate _next;
     private readonly IDatabase _redis;
-    private readonly TimeSpan _inactivityThreshold = TimeSpan.FromMinutes(15);
+    //private readonly TimeSpan _inactivityThreshold = TimeSpan.FromMinutes(15);
     private readonly JwtTokenRotationOptions _options;
     public JwtTokenRotationMiddleware(RequestDelegate next, IConnectionMultiplexer redis, JwtTokenRotationOptions options)
     {
         _next = next;
         _redis = redis.GetDatabase();
         _options = options;
-        _inactivityThreshold = TimeSpan.FromMinutes(_options.InactivityThreshold);
+        //_inactivityThreshold = TimeSpan.FromMinutes(_options.InactivityThreshold);
     }
 
     public async Task InvokeAsync(HttpContext context)
@@ -38,14 +38,7 @@ public class JwtTokenRotationMiddleware
             var jwtToken = handler.ReadJwtToken(token);
 
             // Validate signature & claims
-            var validationParameters = new TokenValidationParameters
-            {
-                ValidateIssuerSigningKey = true,
-                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret)),
-                ValidateIssuer = false,
-                ValidateAudience = false,
-                ValidateLifetime = true                
-            };
+            var validationParameters = _options.TokenValidationParameters;
 
             handler.ValidateToken(token, validationParameters, out _);
 
@@ -56,7 +49,7 @@ public class JwtTokenRotationMiddleware
             if (!lastAccessStr.IsNullOrEmpty)
             {
                 var lastAccess = long.Parse(lastAccessStr);
-                if (now - lastAccess > _inactivityThreshold.TotalMilliseconds)
+                if (now - lastAccess > _options.InactivityThresholdSpan.TotalMilliseconds)
                 {
                     context.Response.StatusCode = StatusCodes.Status401Unauthorized;
                     await context.Response.WriteAsync("Token expired due to inactivity");
@@ -72,8 +65,10 @@ public class JwtTokenRotationMiddleware
                 await context.Response.WriteAsync("Invalid token");
                 return;
             }
-            // Update last access and set TTL
-            await _redis.StringSetAsync(jti, now.ToString(), _inactivityThreshold);
+
+            // Update last access + TTL = remaining token lifetime
+            var remainingLifetime = jwtToken.ValidTo - DateTime.UtcNow; 
+            await _redis.StringSetAsync(jti, now, remainingLifetime);
 
             await _next(context);
         }

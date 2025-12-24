@@ -27,7 +27,7 @@ public class AuthController : ControllerBase
             return BadRequest("UserId is required");
         }
 
-        var token = _jwtGenerator.GenerateToken(request.UserId);
+        var token = _jwtGenerator.GenerateTokenAsync(request.UserId);
         return Ok(new { token });
     }
 

@@ -1,46 +1,67 @@
-﻿namespace JwtTokenMiddleware;
+﻿using Microsoft.IdentityModel.Tokens;
+using System.Text;
+
+namespace JwtTokenMiddleware;
 
 public class JwtTokenRotationOptions
 {
     /// <summary>
-    /// Gets or sets the duration in minutes of inactivity that must elapse before a user is considered inactive.
+    /// Duration in minutes of inactivity before a token is considered expired.
     /// </summary>
-    /// <remarks>
-    /// This threshold is used to determine when to expire authentication tokens due to inactivity.
-    /// If a user does not make any requests within this time frame, 
-    /// their token will be considered expired and they will need to re-authenticate.
-    /// </remarks>
     public int InactivityThreshold { get; set; } = 10;
+    public TimeSpan InactivityThresholdSpan => TimeSpan.FromMinutes(InactivityThreshold);
 
     /// <summary>
-    /// Gets or sets the duration in minutes for which an authentication token remains valid before expiring.
+    /// Absolute expiration in minutes for a token.
     /// </summary>
-    /// <remarks> 
-    /// Token expiration is based on absolute time since issuance, regardless of activity.
-    /// This should be set longer than the inactivity threshold to allow for token refreshes.
-    /// </remarks>
     public int TokenExpiration { get; set; } = 120;
+    public TimeSpan TokenExpirationSpan => TimeSpan.FromMinutes(TokenExpiration);
 
     /// <summary>
-    /// Gets or sets the connection string used to connect to the Redis server.
+    /// Redis connection string.
     /// </summary>
     public string RedisConnectionString { get; set; } = "localhost:6379";
 
     /// <summary>
-    /// Gets or sets the secret key used to sign and validate JSON Web Tokens (JWTs).
+    /// Secret key for signing JWTs. Must be >= 32 characters (256 bits).
     /// </summary>
-    /// <remarks>The secret should be a sufficiently long and random string to ensure the security of
-    /// generated tokens. Changing this value will invalidate all previously issued tokens that were signed with the old
-    /// secret.</remarks>
-    public string JwtSecret { get; set; } = "your-secret-key";
+    public string JwtSecret { get; set; } = "u1X9zPqQe7vNf4sTj8wYk2rLm5aB0cVdGhJxZpQnR3sUoWmYt";
 
     /// <summary>
-    /// Gets or sets the issuer identifier for the application.
+    /// Issuer identifier.
     /// </summary>
     public string Issuer { get; set; } = "JwtRefreshTokenRotation";
 
     /// <summary>
-    /// Gets or sets the intended audience for the authentication token.
+    /// Audience identifier.
     /// </summary>
-    public string Audience { get; set; }= "JwtRefreshTokenRotation-Users";
+    public string Audience { get; set; } = "JwtRefreshTokenRotation-Users";
+
+    private TokenValidationParameters? _tokenValidationParameters;
+
+    /// <summary>
+    /// Gets or sets the parameters used to validate JSON Web Tokens (JWTs) during authentication.
+    /// Allow user to override the default validation parameters.
+    /// </summary>
+    public TokenValidationParameters TokenValidationParameters
+    {
+        get
+        {
+            if (_tokenValidationParameters != null) return _tokenValidationParameters;
+
+            // Default if user hasn't supplied one
+            return new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(JwtSecret)),
+                ValidateIssuer = true,
+                ValidIssuer = Issuer,
+                ValidateAudience = true,
+                ValidAudience = Audience,
+                ValidateLifetime = true,
+                ClockSkew = TimeSpan.Zero
+            };
+        }
+        set => _tokenValidationParameters = value;
+    }
 }

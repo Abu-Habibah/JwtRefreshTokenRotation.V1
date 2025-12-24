@@ -21,7 +21,7 @@ public class JwtTokenRotationMiddlewareTests
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
 
         JwtTokenGenerator generator = new JwtTokenGenerator(_options);
-        return generator.GenerateToken(userId);
+        return generator.GenerateTokenAsync(userId);
 
     }
 

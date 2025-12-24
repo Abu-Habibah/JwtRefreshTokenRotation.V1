@@ -9,13 +9,15 @@ namespace JwtTokenMiddleware;
 public class JwtTokenGenerator
 {
     private readonly JwtTokenRotationOptions _options;
+    private readonly IDatabase _redis;
 
-    public JwtTokenGenerator(JwtTokenRotationOptions options)
+    public JwtTokenGenerator(JwtTokenRotationOptions options, IConnectionMultiplexer redis)
     {
         _options = options;
+        _redis = redis.GetDatabase();
     }
 
-    public string GenerateToken(string userId, IEnumerable<Claim>? additionalClaims = null)
+    public async Task<string> GenerateTokenAsync(string userId, IEnumerable<Claim>? additionalClaims = null)
     {
         var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.JwtSecret));
         var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
@@ -30,21 +32,24 @@ public class JwtTokenGenerator
             claims.AddRange(additionalClaims);
 
         var token = new JwtSecurityToken(
-            issuer: _options.Issuer,             
-            audience: _options.Audience, 
+            issuer: _options.Issuer,
+            audience: _options.Audience,
             claims: claims,
-            expires: DateTime.UtcNow.AddMinutes(_options.TokenExpiration), 
+            expires: DateTime.UtcNow.AddMinutes(_options.TokenExpiration),
             signingCredentials: credentials
         );
 
         //TODO: add token jti to Redis with initial last access time?
-        var redis = ConnectionMultiplexer.Connect(_options.RedisConnectionString);
-        redis.GetDatabase().StringSet(
-            token.Id, 
-            DateTimeOffset.UtcNow.ToUnixTimeMilliseconds().ToString(), 
-            TimeSpan.FromMinutes(_options.InactivityThreshold)
-        );
+        bool set = await _redis.StringSetAsync(token.Id,
+                                               DateTime.UtcNow.ToString(),
+                                               _options.TokenExpirationSpan);
+
+        if (!set)
+        {
+            throw new Exception("Failed to store token in Redis");
+        }
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+
     }
 }
