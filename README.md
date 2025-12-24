@@ -100,4 +100,4 @@ User                AuthController          JwtTokenGenerator        Redis      
 Add the NuGet package (once published):
 
 ```bash
-dotnet add package JwtInactivityMiddleware
+dotnet add package JwtRefreshTokenRotation --version 1.0.0
