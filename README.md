@@ -1,7 +1,7 @@
 # JWT Inactivity Middleware 🔒
 
 [![NuGet](https://img.shields.io/nuget/v/JwtInactivityMiddleware.svg)](https://www.nuget.org/packages/JwtInactivityMiddleware)
-[![Build](https://github.com/Abu-Habibah/JwtInactivityMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Abu-Habibah/JwtInactivityMiddleware/actions)
+[![CI](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 **JWT Inactivity Middleware** is a reusable ASP.NET Core package that enforces inactivity thresholds on JWT bearer tokens.  
