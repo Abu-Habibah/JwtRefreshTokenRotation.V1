@@ -1,6 +1,6 @@
 # JWT Inactivity Middleware 🔒
 
-[![NuGet](https://img.shields.io/nuget/v/JwtInactivityMiddleware.svg)](https://www.nuget.org/packages/JwtInactivityMiddleware)
+[![NuGet](https://img.shields.io/nuget/v/JwtRefreshTokenRotation.svg)](https://www.nuget.org/packages/JwtRefreshTokenRotation)
 [![CI](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
