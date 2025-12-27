@@ -95,9 +95,3 @@ User                AuthController          JwtTokenGenerator        Redis      
 
 ```
 ---
-## 📦 Installation
-
-Add the NuGet package (once published):
-
-```bash
-dotnet add package JwtRefreshTokenRotation --version 1.0.0
