@@ -13,7 +13,7 @@
 		<!--<Company></Company>-->
 		<Description>ASP.NET Core middleware for JWT inactivity threshold enforcement with Redis-backed tracking.</Description>
 		<PackageTags>jwt;middleware;redis;aspnetcore;security;authentication</PackageTags>
-		<RepositoryUrl>https://github.com/yourusername/JwtInactivityMiddleware</RepositoryUrl>
+		<RepositoryUrl>https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1</RepositoryUrl>
 		<PackageLicenseExpression>MIT</PackageLicenseExpression>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 	</PropertyGroup>
