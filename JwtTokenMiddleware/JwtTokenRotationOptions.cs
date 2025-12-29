@@ -5,6 +5,13 @@ namespace JwtTokenMiddleware;
 
 public class JwtTokenRotationOptions
 {
+
+    /// <summary>
+    /// Auto -extend token expiration on activity.
+    /// when remaining token life time is less than InactivityThreshold.
+    /// </summary>
+    public bool TokenExpirationAutoExtend { get; set; } = true;
+
     /// <summary>
     /// Duration in minutes of inactivity before a token is considered expired.
     /// </summary>

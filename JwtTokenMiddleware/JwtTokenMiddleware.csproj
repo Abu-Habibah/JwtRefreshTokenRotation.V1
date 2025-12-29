@@ -8,15 +8,28 @@
 
 		<!-- NuGet package metadata -->
 		<PackageId>JwtRefreshTokenRotation</PackageId>
-		<Version>1.0.0</Version>
+		<Version>1.1.0</Version>
 		<Authors>Abu Habibah</Authors>
 		<!--<Company></Company>-->
 		<Description>ASP.NET Core middleware for JWT inactivity threshold enforcement with Redis-backed tracking.</Description>
 		<PackageTags>jwt;middleware;redis;aspnetcore;security;authentication</PackageTags>
-		<RepositoryUrl>https://github.com/yourusername/JwtInactivityMiddleware</RepositoryUrl>
-		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+		<RepositoryUrl>https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1</RepositoryUrl>
+		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+		<Title>JwtRefreshTokenRotation</Title>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
+
+	<ItemGroup>
+	  <Compile Remove="JwtTokenGeneratorX.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="..\README.md">
+	    <Pack>True</Pack>
+	    <PackagePath>\</PackagePath>
+	  </None>
+	</ItemGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.1" />

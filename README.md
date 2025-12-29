@@ -95,9 +95,21 @@ User                AuthController          JwtTokenGenerator        Redis      
 
 ```
 ---
+## 📝 Change Log
+    🏷️ 1.1.0 
+        - Added auto extend expiration feature.
+        - When expiration is extended, a new token with an updated jti 
+          should be returned via the 'X-New-Token' response header.
+        - Delete old jti from Redis when token is regenerated.
+        - Improved jwt generation by using SecurityTokenDescriptor
+          rather than JwtSecurityToken.
+
+    🏷️ 1.0.0 
+        - Initial release with core inactivity tracking features.
+
+---
 ## 📦 Installation
 
-Add the NuGet package (once published):
 
 ```bash
-dotnet add package JwtRefreshTokenRotation --version 1.0.0
+dotnet add package JwtRefreshTokenRotation --version 1.1.0
