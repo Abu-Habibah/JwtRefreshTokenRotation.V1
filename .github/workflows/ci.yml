@@ -77,7 +77,5 @@ jobs:
       run: dotnet nuget push ./artifacts/**/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json
 
     - name: Publish to GitHub Packages
-      run: dotnet nuget push ./artifacts/**/*.nupkg \
-       --api-key ${{ secrets.GH_PACKAGES_TOKEN }} \
-       --source https://nuget.pkg.github.com/Abu-Habibah/index.json
+      run: dotnet nuget push ./artifacts/**/*.nupkg --api-key ${{ secrets.GH_PACKAGES_TOKEN }} --source "https://nuget.pkg.github.com/Abu-Habibah/index.json" --skip-duplicate
 
