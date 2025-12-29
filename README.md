@@ -1,8 +1,9 @@
 # JWT Inactivity Middleware 🔒
 
-[![NuGet](https://img.shields.io/nuget/v/JwtInactivityMiddleware.svg)](https://www.nuget.org/packages/JwtInactivityMiddleware)
-[![Build](https://github.com/Abu-Habibah/JwtInactivityMiddleware/actions/workflows/dotnet.yml/badge.svg)](https://github.com/Abu-Habibah/JwtInactivityMiddleware/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![NuGet](https://img.shields.io/nuget/v/JwtRefreshTokenRotation.svg)](https://www.nuget.org/packages/JwtRefreshTokenRotation)
+[![CI](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml)
+[![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
+
 
 **JWT Inactivity Middleware** is a reusable ASP.NET Core package that enforces inactivity thresholds on JWT bearer tokens.  
 Unlike standard JWT expiration (`exp`), this middleware tracks *last access time* in Redis and rejects tokens that exceed a configurable inactivity window.
