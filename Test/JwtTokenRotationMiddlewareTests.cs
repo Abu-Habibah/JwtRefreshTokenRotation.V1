@@ -1,19 +1,26 @@
-﻿using System.IdentityModel.Tokens.Jwt;
-using System.Text;
+﻿using JwtTokenMiddleware;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
+using System.IdentityModel.Tokens.Jwt;
+using System.Text;
 using Xunit;
-using JwtTokenMiddleware;
+using Xunit.Abstractions;
 
 public class JwtTokenRotationMiddlewareTests
 {
+    private readonly ITestOutputHelper _output;
     private readonly JwtTokenRotationOptions _options = new()
     {
         JwtSecret = "u1X9zPqQe7vNf4sTj8wYk2rLm5aB0cVdGhJxZpQnR3sUoWmYt",
         RedisConnectionString = "localhost:6379",
         InactivityThreshold = 1 // 1 minute for testing
     };
+
+    public JwtTokenRotationMiddlewareTests(ITestOutputHelper output)
+    {
+        _output = output;
+    }
 
     private async Task<(string jwtToken, ConnectionMultiplexer redis)> GenerateJwtAsync(string userId)
     {
@@ -98,8 +105,8 @@ public class JwtTokenRotationMiddlewareTests
         {
             JwtSecret = _options.JwtSecret,
             RedisConnectionString = _options.RedisConnectionString,
-            InactivityThreshold = 1, // 1 minute
-            TokenExpiration = 1,     // 1 minute absolute expiration
+            InactivityThreshold = 2, // 1 minute
+            TokenExpiration = 3,     // 2 minute absolute expiration
             TokenExpirationAutoExtend = true
         };
 
@@ -118,17 +125,31 @@ public class JwtTokenRotationMiddlewareTests
         var context = new DefaultHttpContext();
         context.Request.Headers["Authorization"] = $"Bearer {jwtToken}";
 
+        // first request so it sets last access time
+        await Task.Delay(TimeSpan.FromSeconds(60));
+
         // Act: invoke middleware
         await middleware.InvokeAsync(context);
 
+        var context2 = new DefaultHttpContext();
+        context2.Request.Headers["Authorization"] = $"Bearer {jwtToken}";
+
+        // second request, delay request to be near expiry but within inactivity threshold
+        await Task.Delay(TimeSpan.FromSeconds(70));
+
+        // Act: invoke middleware
+        await middleware.InvokeAsync(context2);
+
         // Assert: request passes
-        Assert.Equal(200, context.Response.StatusCode);
+        Assert.Equal(200, context2.Response.StatusCode);
 
         // Assert: new token header is present
-        Assert.True(context.Response.Headers.ContainsKey("X-New-Token"),
+        Assert.True(context2.Response.Headers.ContainsKey("X-New-Token"),
             "Expected middleware to issue a new token header");
 
         var newToken = context.Response.Headers["X-New-Token"].ToString();
+
+
         Assert.False(string.IsNullOrEmpty(newToken), "New token should not be empty");
 
         // Verify new token is valid and different from old one
@@ -136,9 +157,20 @@ public class JwtTokenRotationMiddlewareTests
         var oldJwt = handler.ReadJwtToken(jwtToken);
         var newJwt = handler.ReadJwtToken(newToken);
 
+        _output.WriteLine($"Old Token: {oldJwt}");
+        _output.WriteLine($"New Token: {newJwt}");
+        
         Assert.NotEqual(oldJwt.Id, newJwt.Id);
         Assert.True(newJwt.ValidTo >= oldJwt.ValidTo,
             $"Expected new token expiry {newJwt.ValidTo} to be later than old {oldJwt.ValidTo}");
+
+        // verify that the old token is purged from Redis
+        var db = redis.GetDatabase();
+        var oldTokenKey = $"jwt:lastaccess:{oldJwt.Id}";
+        var oldTokenExists = await db.KeyExistsAsync(oldTokenKey);
+
+        _output.WriteLine($"Old Token Key Exists in Redis: {oldTokenExists}");
+        Assert.False(oldTokenExists, "Old token should be purged from Redis");
     }
 
 

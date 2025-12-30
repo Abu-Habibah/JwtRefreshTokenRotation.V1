@@ -8,7 +8,7 @@
 
 		<!-- NuGet package metadata -->
 		<PackageId>JwtRefreshTokenRotation</PackageId>
-		<Version>1.1.1</Version>
+		<Version>1.1.2</Version>
 		<Authors>Abu Habibah</Authors>
 		<!--<Company></Company>-->
 		<Description>ASP.NET Core middleware for JWT inactivity threshold enforcement with Redis-backed tracking.</Description>
