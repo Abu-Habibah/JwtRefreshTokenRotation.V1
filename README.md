@@ -16,19 +16,54 @@ Unlike standard JWT expiration (`exp`), this middleware tracks *last access time
 - **Sliding expiration**: Active tokens remain valid as long as they’re used within the threshold.  
 - **Configurable options**: Set inactivity threshold, Redis connection string, and JWT secret via `JwtTokenRotationOptions`.  
 - **JWT generator service**: Issue tokens with `jti` claim for inactivity tracking.  
+- **Fix Window Rate Limiter**: Optional rate limiting based on fixed time windows to control request rates.
 
 ---
 ## ✈️ Usage
 Register to service
 
 ```csharp
-builder.Services.AddJwtTokenRotation(new JwtTokenRotationOptions
+builder.Services.AddRedisServer("localhost:6379");
+builder.Services.AddRateLimiter(new LimitingOptions
 {
-    InactivityThreshold = TimeSpan.FromMinutes(15),
-    RedisConnectionString = "localhost:6379",
-    JwtSecret = builder.Configuration["Jwt:Secret"]
+    FallbackMode = RateLimitFallbackMode.FailFast,
+    UnauthorizedOptions = new LimitingPolicy
+    {
+        GeneralOption = new GeneralLimitingOption
+        {
+            MaxRequests = 10,
+            WindowSpan = TimeSpan.FromMinutes(2)
+        }
+    },
+    AuthorizedOptions = new LimitingPolicy
+    {
+        GeneralOption = new GeneralLimitingOption { MaxRequests = 100 },
+        EndpointOptions =
+        {
+            new EndpointLimitingOption { Endpoint = "/api/login", MaxRequests = 5 },
+            new EndpointLimitingOption { Endpoint = "/api/*", MaxRequests = 50 },
+            new EndpointLimitingOption { Endpoint = "/api/users/{id}", MaxRequests = 20 }
+        }
+    }
 });
 
+builder.Services.AddJwtTokenRotation(new JwtTokenRotationOptions
+{
+    InactivityThreshold = 10,
+    TokenExpiration = 120,
+    //RedisConnectionString = "localhost:6379",
+    JwtSecret = "YourSuperSecretKeyHere"
+});
+
+var app = builder.Build();
+
+// Configure the HTTP request pipeline.
+if (app.Environment.IsDevelopment())
+{
+    app.MapOpenApi();
+}
+
+app.UseRateLimitingMiddleware();
 app.UseJwtTokenRotation();
 ````
 ---
@@ -51,52 +86,78 @@ Contributions are welcome!
 * Please ensure all tests pass before submitting.
 * For major changes, open an issue first to discuss what you’d like to change.
 ---
+
 ## 🛠 Project Structure
 ```csharp
 JwtTokenMiddleware/
- ├── JwtTokenRotationMiddleware.cs   # Core middleware logic
- ├── JwtTokenRotationOptions.cs      # Configurable options
- ├── JwtTokenGenerator.cs            # Token generator service
- ├── JwtTokenRotationExtension.cs      # DI + middleware registration
- ├── JwtTokenMiddleware.csproj       # Library project file
+    RateLimiter/
+         ├── ILimitingOption.cs                 # Limiting option interface
+         ├── LimitingOptions.cs                 # Limiting options model
+         ├── LimitingPolicy.cs                  # Limiting policy model
+         ├── LimitingPolicyResolver.cs          # Limiting policy resolver
+         ├── RateLimitFallbackMode.cs           # Limiting fallback mode enum
+         ├── RateLimitingExtension.cs           # DI + middleware registration
+         ├── RateLimitingMiddleware.cs          # Middleware logic
+     Redis/
+         ├── RedisConnectionExtention.cs        # DI registration for Redis IConnectionMultiplexer
+     TokenRotation/
+         ├── JwtTokenRotationMiddleware.cs      # Core middleware logic
+         ├── JwtTokenRotationOptions.cs         # Configurable options
+         ├── JwtTokenGenerator.cs               # Token generator service
+         ├── JwtTokenRotationExtension.cs       # DI + middleware registration
+         ├── JwtTokenMiddleware.csproj          # Library project file
 
 JwtTokenMiddleware.Sample/
- ├── Program.cs                      # Demo API setup
- ├── Controllers/AuthController.cs   # Example login + token issuance
+ ├── Program.cs                                 # Demo API setup
+ ├── Controllers/AuthController.cs              # Example login + token issuance
  ├── JwtTokenMiddleware.Sample.csproj
 
 JwtTokenMiddleware.Test/
- ├── JwtTokenRotationMiddlewareTests.cs              # Unit tests for inactivity logic
+ ├── JwtTokenRotationMiddlewareTests.cs         # Unit tests for inactivity logic
  ├── JwtTokenMiddleware.Test.csproj
 ```
 ----
 
 ## 🔌Sequence Diagram
 ```csharp
-User                AuthController          JwtTokenGenerator        Redis                Middleware
- |                        |                        |                   |                        |
- |--- Login Request ----->|                        |                   |                        |
- |                        |--- GenerateTokenAsync->|                   |                        |
- |                        |                        |--- Create JWT ----|                        |
- |                        |                        |--- Store jti,lastAccess,TTL=TokenExpiration->|
- |                        |<-- JWT Token ----------|                   |                        |
- |<-- Token Response -----|                        |                   |                        |
- |                                                                                              |
- |--- API Request -------->------------------------>-------------------|----------------------->|
- |                        |                        |                   |                        |
- |                        |                        |                   |--- Get jti,lastAccess->|
- |                        |                        |                   |<-- lastAccess,TTL -----|
- |                        |                        |                   |                        |
- |                        |                        |                   |--- Compare inactivity--|
- |                        |                        |                   |--- If expired -> 401 --|
- |                        |                        |                   |                        |
- |                        |                        |                   |--- If valid: update lastAccess, TTL=remainingLifetime->|
- |                        |                        |                   |                        |
- |<-- Response (200/401)--|                        |                   |                        |
+User                AuthController          JwtTokenGenerator        Redis                                                                      Middleware
+ |                        |                        |                   |                                                                            |
+ |--- Login Request ----->|                        |                   |                                                                            |
+ |                        |--- GenerateTokenAsync->|                   |                                                                            |
+ |                        |                        |--- Create JWT ----|                                                                            |
+ |                        |                        |--- Store jti,lastAccess,TTL=TokenExpiration -------------------------------------------------->|
+ |                        |<-- JWT Token ----------|                   |                                                                            |
+ |<-- Token Response -----|                        |                   |                                                                            |
+ |                                                                                                                                                  |
+ |--- API Request -------->------------------------------------------------------->-----------------------------------------------------------------|
+ |                        |                        |                   |                                                                            |
+ |                        |                        |                   |--- RateLimiter: INCR key, EXPIRE window span ----------------------------->|
+ |                        |                        |                   |<-- allowed/blocked, remaining, reset --------------------------------------|
+ |                        |                        |                   |<-- X-RateLimit-Limit, X-RateLimit-Remaining, X-RateLimit-Reset headers ----|
+ |                        |                        |                   |                                                                            |
+ |                        |                        |                   |--- Get jti,lastAccess ---------------------------------------------------->|
+ |                        |                        |                   |<-- lastAccess,TTL ---------------------------------------------------------|
+ |                        |                        |                   |--- Compare inactivity -----------------------------------------------------|
+ |                        |                        |                   |--- If expired -> 401 ------------------------------------------------------|
+ |                        |                        |                   |--- If valid: update lastAccess, TTL=remainingLifetime--------------------->|
+ |                        |                        |                   |--- If extended: issue new token ------------------------------------------>|
+ |                        |                        |                   |<-- X-New-Token header -----------------------------------------------------|
+ |                        |                        |                   |                                                                            |
+ |<-- Response (200/401/429) with headers ---------|                   |                                                                            |
 
 ```
 ---
 ## 📝 Change Log
+    🏷️ 1.5.0 
+        - Added 'fix window' rate limiter feature.
+        - Limiting information is returned via response headers:
+            "X-RateLimit-Limit" = Max request in a window span
+            "X-RateLimit-Remaining" = remaining requests in the current window
+            "X-RateLimit-Reset" = remaining time in seconds until the window span resets.
+        - Redis server is now configurable via RedisConnectionExtension or you may register
+          your own IConnectionMultiplexer instance.
+
+
     🏷️ 1.1.0 
         - Added auto extend expiration feature.
         - When expiration is extended, a new token with an updated jti 
@@ -113,4 +174,4 @@ User                AuthController          JwtTokenGenerator        Redis      
 
 
 ```bash
-dotnet add package JwtRefreshTokenRotation --version 1.1.0
+dotnet add package JwtRefreshTokenRotation --version 1.5.0

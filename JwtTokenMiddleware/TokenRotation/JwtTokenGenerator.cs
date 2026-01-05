@@ -4,7 +4,7 @@ using System.Text;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 
-namespace JwtTokenMiddleware;
+namespace JwtTokenMiddleware.TokenRotation;
 
 public class JwtTokenGenerator
 {

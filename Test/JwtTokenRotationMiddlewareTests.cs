@@ -1,4 +1,4 @@
-﻿using JwtTokenMiddleware;
+﻿using JwtTokenMiddleware.TokenRotation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
