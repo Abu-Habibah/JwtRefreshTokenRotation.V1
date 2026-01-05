@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace JwtTokenMiddleware;
+namespace JwtTokenMiddleware.TokenRotation;
 
 public class JwtTokenRotationOptions
 {
@@ -26,8 +26,9 @@ public class JwtTokenRotationOptions
 
     /// <summary>
     /// Redis connection string.
-    /// </summary>
-    public string RedisConnectionString { get; set; } = "localhost:6379";
+    /// </summary>   
+    [Obsolete("Use RedisConnectionExtension instead")]
+    public string RedisConnectionString { get; set; }
 
     /// <summary>
     /// Secret key for signing JWTs. Must be >= 32 characters (256 bits).
@@ -43,6 +44,8 @@ public class JwtTokenRotationOptions
     /// Audience identifier.
     /// </summary>
     public string Audience { get; set; } = "JwtRefreshTokenRotation-Users";
+
+    public bool ActivateRateLimiting { get; set; } = false;
 
     private TokenValidationParameters? _tokenValidationParameters;
 
