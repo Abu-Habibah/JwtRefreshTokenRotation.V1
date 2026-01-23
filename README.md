@@ -4,6 +4,11 @@
 [![CI](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
+## ⚠️ Deprecation Notice
+The NuGet package `JwtRefreshTokenRotation` will be renamed to `TokenMiddleware`.
+- `JwtRefreshTokenRotation` v2.0.0 is the final release under the old name.
+- Please migrate to `TokenMiddleware` for future updates.
+
 
 **JWT Inactivity Middleware** is a reusable ASP.NET Core package that enforces inactivity thresholds on JWT bearer tokens.  
 Unlike standard JWT expiration (`exp`), this middleware tracks *last access time* in Redis and rejects tokens that exceed a configurable inactivity window.
@@ -148,15 +153,17 @@ User                AuthController          JwtTokenGenerator        Redis      
 ```
 ---
 ## 📝 Change Log
+    🏷️ 2.0.0 
+        - Update 'fix window' rate limiter feature.
+        - Redis server is now configurable via RedisConnectionExtension or you may register
+          your own IConnectionMultiplexer instance.
+
     🏷️ 1.5.0 
         - Added 'fix window' rate limiter feature.
         - Limiting information is returned via response headers:
             "X-RateLimit-Limit" = Max request in a window span
             "X-RateLimit-Remaining" = remaining requests in the current window
             "X-RateLimit-Reset" = remaining time in seconds until the window span resets.
-        - Redis server is now configurable via RedisConnectionExtension or you may register
-          your own IConnectionMultiplexer instance.
-
 
     🏷️ 1.1.0 
         - Added auto extend expiration feature.
@@ -174,4 +181,4 @@ User                AuthController          JwtTokenGenerator        Redis      
 
 
 ```bash
-dotnet add package JwtRefreshTokenRotation --version 1.5.0
+dotnet add package JwtRefreshTokenRotation --version 2.0.0
