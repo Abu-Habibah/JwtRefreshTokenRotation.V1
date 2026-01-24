@@ -7,16 +7,16 @@
 
 
 		<!-- NuGet package metadata -->
-		<PackageId>JwtRefreshTokenRotation</PackageId>
+		<PackageId>TokenSharp</PackageId>
 		<Version>2.0.0</Version>
 		<Authors>Abu Habibah</Authors>
 		<!--<Company></Company>-->
-		<Description>ASP.NET Core middleware for JWT inactivity threshold enforcement with Redis-backed tracking.</Description>
-		<PackageTags>jwt;middleware;redis;aspnetcore;security;authentication</PackageTags>
+		<Description>ASP.NET Core middleware for JWT Bearer token, session token and inactivity threshold enforcement with Redis-backed tracking.</Description>
+		<PackageTags>jwt;session token;middleware;redis;aspnetcore;security;authentication</PackageTags>
 		<RepositoryUrl>https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1</RepositoryUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-		<Title>JwtRefreshTokenRotation</Title>
+		<Title>Token Middleware</Title>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 	</PropertyGroup>
 

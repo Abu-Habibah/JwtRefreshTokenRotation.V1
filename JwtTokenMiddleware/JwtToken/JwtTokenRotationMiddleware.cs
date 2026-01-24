@@ -3,7 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
 
-namespace JwtTokenMiddleware.TokenRotation;
+namespace TokenMiddleware.JwtToken;
 
 public class JwtTokenRotationMiddleware
 {
@@ -83,7 +83,7 @@ public class JwtTokenRotationMiddleware
                 await _redis.KeyDeleteAsync(jti);
 
                 // Return new token to client via response header
-                context.Response.Headers["X-New-Token"] = newToken;
+                context.Response.Headers[GeneralConst.X_NEW_TOKEN] = newToken;
 
                 ttl = _options.TokenExpirationSpan;
             }

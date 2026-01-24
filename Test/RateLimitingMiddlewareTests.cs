@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using System;
 using System.Threading.Tasks;
+using TokenMiddleware.RateLimiter;
 using Xunit;
 
 namespace JwtTokenMiddleware.Limiter.Test

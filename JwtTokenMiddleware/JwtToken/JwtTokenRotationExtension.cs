@@ -2,7 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 
-namespace JwtTokenMiddleware.TokenRotation;
+namespace TokenMiddleware.JwtToken;
 
 public static class JwtTokenRotationExtension
 {

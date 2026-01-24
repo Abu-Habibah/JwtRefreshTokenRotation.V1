@@ -1,46 +1,48 @@
-﻿using JwtTokenMiddleware.RateLimiter;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
-public static class LimitingPolicyResolver
+namespace TokenMiddleware.RateLimiter
 {
-    /// <summary>
-    /// Resolves the correct limiting option for a request.
-    /// </summary>
-    public static ILimitingOption Resolve(LimitingOptions options, bool isAuthorized, string path)
+    public static class LimitingPolicyResolver
     {
-        var policy = isAuthorized ? options.AuthorizedOptions : options.UnauthorizedOptions;
-
-        if (policy == null)
-            throw new InvalidOperationException("No limiting policy configured.");
-
-        // Try endpoint-specific overrides
-        foreach (var endpointOption in policy.EndpointOptions)
+        /// <summary>
+        /// Resolves the correct limiting option for a request.
+        /// </summary>
+        public static ILimitingOption Resolve(LimitingOptions options, bool isAuthorized, string path)
         {
-            if (IsMatch(endpointOption.Endpoint, path))
+            var policy = isAuthorized ? options.AuthorizedOptions : options.UnauthorizedOptions;
+
+            if (policy == null)
+                throw new InvalidOperationException("No limiting policy configured.");
+
+            // Try endpoint-specific overrides
+            foreach (var endpointOption in policy.EndpointOptions)
             {
-                return endpointOption;
+                if (IsMatch(endpointOption.Endpoint, path))
+                {
+                    return endpointOption;
+                }
             }
+
+            // Fallback to general option
+            return policy.GeneralOption!;
         }
 
-        // Fallback to general option
-        return policy.GeneralOption!;
-    }
+        /// <summary>
+        /// Matches endpoint patterns against the request path.
+        /// Supports wildcards (*) and route templates ({param}).
+        /// </summary>
+        private static bool IsMatch(string pattern, string path)
+        {
+            if (string.IsNullOrWhiteSpace(pattern)) return false;
 
-    /// <summary>
-    /// Matches endpoint patterns against the request path.
-    /// Supports wildcards (*) and route templates ({param}).
-    /// </summary>
-    private static bool IsMatch(string pattern, string path)
-    {
-        if (string.IsNullOrWhiteSpace(pattern)) return false;
+            // Convert route template or wildcard to regex
+            var regexPattern = "^" + Regex.Escape(pattern)
+                .Replace("\\*", ".*")                // wildcard
+                .Replace("\\{", "{").Replace("\\}", "}") // keep braces
+                .Replace("{.*?}", "[^/]+")           // route param
+                + "$";
 
-        // Convert route template or wildcard to regex
-        var regexPattern = "^" + Regex.Escape(pattern)
-            .Replace("\\*", ".*")                // wildcard
-            .Replace("\\{", "{").Replace("\\}", "}") // keep braces
-            .Replace("{.*?}", "[^/]+")           // route param
-            + "$";
-
-        return Regex.IsMatch(path, regexPattern, RegexOptions.IgnoreCase);
+            return Regex.IsMatch(path, regexPattern, RegexOptions.IgnoreCase);
+        }
     }
 }

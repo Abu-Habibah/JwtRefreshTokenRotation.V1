@@ -1,4 +1,4 @@
-﻿namespace JwtTokenMiddleware.RateLimiter;
+﻿namespace TokenMiddleware.RateLimiter;
 
 public enum RateLimitFallbackMode
 {
