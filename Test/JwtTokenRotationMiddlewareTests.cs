@@ -1,10 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
-using Microsoft.IdentityModel.Tokens;
 using StackExchange.Redis;
 using System.IdentityModel.Tokens.Jwt;
-using System.Text;
 using TokenMiddleware.JwtToken;
-using Xunit;
 using Xunit.Abstractions;
 
 public class JwtTokenRotationMiddlewareTests
