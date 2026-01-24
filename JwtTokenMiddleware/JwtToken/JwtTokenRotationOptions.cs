@@ -1,7 +1,7 @@
 ﻿using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
-namespace JwtTokenMiddleware.TokenRotation;
+namespace TokenMiddleware.JwtToken;
 
 public class JwtTokenRotationOptions
 {

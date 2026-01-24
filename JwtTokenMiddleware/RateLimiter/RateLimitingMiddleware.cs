@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using StackExchange.Redis;
 
-namespace JwtTokenMiddleware.RateLimiter;
+namespace TokenMiddleware.RateLimiter;
 
 public class RateLimitingMiddleware
 {
@@ -52,9 +52,9 @@ public class RateLimitingMiddleware
             var reset = (int)result[2];
 
             // Add standard rate limit headers
-            context.Response.Headers["X-RateLimit-Limit"] = limitingOption.MaxRequests.ToString();
-            context.Response.Headers["X-RateLimit-Remaining"] = remaining.ToString();
-            context.Response.Headers["X-RateLimit-Reset"] = reset.ToString();
+            context.Response.Headers[GeneralConst.X_LIMIT_LIMIT] = limitingOption.MaxRequests.ToString();
+            context.Response.Headers[GeneralConst.X_LIMIT_REMAINING] = remaining.ToString();
+            context.Response.Headers[GeneralConst.X_LIMIT_RESET] = reset.ToString();
 
             if (allowed == 0)
             {

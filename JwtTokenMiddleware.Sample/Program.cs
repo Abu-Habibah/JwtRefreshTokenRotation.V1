@@ -1,7 +1,6 @@
-using JwtTokenMiddleware;
-using JwtTokenMiddleware.RateLimiter;
-using JwtTokenMiddleware.Redis;
-using JwtTokenMiddleware.TokenRotation;
+using TokenMiddleware.JwtToken;
+using TokenMiddleware.RateLimiter;
+using TokenMiddleware.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 

@@ -5,7 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace JwtTokenMiddleware.Redis
+namespace TokenMiddleware.Redis
 {
     public static class RedisConnectionExtension
     {

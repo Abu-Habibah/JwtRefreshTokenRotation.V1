@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using JwtTokenMiddleware.TokenRotation;
+using TokenMiddleware.JwtToken;
 
 namespace JwtTokenMiddleware.Sample.Controllers;
 
