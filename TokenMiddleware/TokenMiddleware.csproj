@@ -13,7 +13,7 @@
 		<!--<Company></Company>-->
 		<Description>ASP.NET Core middleware for JWT Bearer token, session token and inactivity threshold enforcement with Redis-backed tracking.</Description>
 		<PackageTags>jwt;session token;middleware;redis;aspnetcore;security;authentication</PackageTags>
-		<RepositoryUrl>https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1</RepositoryUrl>
+		<RepositoryUrl>https://github.com/Abu-Habibah/TokenSharp</RepositoryUrl>
 		<PackageLicenseExpression>AGPL-3.0-or-later</PackageLicenseExpression>
 		<GeneratePackageOnBuild>true</GeneratePackageOnBuild>
 		<Title>Token Middleware</Title>

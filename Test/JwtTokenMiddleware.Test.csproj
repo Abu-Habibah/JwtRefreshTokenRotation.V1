@@ -20,7 +20,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\JwtTokenMiddleware\TokenMiddleware.csproj" />
+    <ProjectReference Include="..\TokenMiddleware\TokenMiddleware.csproj" />
   </ItemGroup>
 
   <ItemGroup>

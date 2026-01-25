@@ -1,5 +1,5 @@
 <Solution>
   <Project Path="JwtTokenMiddleware.Sample/JwtTokenMiddleware.Sample.csproj" />
-  <Project Path="JwtTokenMiddleware/TokenMiddleware.csproj" />
   <Project Path="Test/JwtTokenMiddleware.Test.csproj" />
+  <Project Path="TokenMiddleware/TokenMiddleware.csproj" />
 </Solution>
