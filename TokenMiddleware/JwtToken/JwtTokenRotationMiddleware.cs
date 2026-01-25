@@ -20,6 +20,18 @@ public class JwtTokenRotationMiddleware
         _options = options;
     }
 
+    /// <summary>
+    /// Processes an HTTP request to validate a JWT bearer token, manage token expiration due to inactivity, and
+    /// optionally issue a new token if auto-extension is enabled.
+    /// </summary>
+    /// <remarks>This method checks for a valid JWT bearer token in the Authorization header, validates the
+    /// token's signature and claims, and enforces inactivity expiration using a Redis-backed store. If the token is
+    /// nearing expiration and auto-extension is enabled, a new token is issued and returned in the response header. The
+    /// method responds with appropriate HTTP status codes and messages for missing, invalid, or expired
+    /// tokens.</remarks>
+    /// <param name="context">The HTTP context for the current request, containing request and response information, including the
+    /// Authorization header with the JWT bearer token.</param>
+    /// <returns>A task that represents the asynchronous operation of token validation and processing.</returns>
     public async Task InvokeAsync(HttpContext context)
     {
         var authHeader = context.Request.Headers["Authorization"].FirstOrDefault();

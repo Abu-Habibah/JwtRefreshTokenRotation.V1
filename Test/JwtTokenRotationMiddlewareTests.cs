@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using TokenMiddleware.JwtToken;
 using Xunit.Abstractions;
 
+namespace JwtTokenMiddleware.Jwt.Test;
 public class JwtTokenRotationMiddlewareTests
 {
     private readonly ITestOutputHelper _output;
