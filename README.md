@@ -1,7 +1,7 @@
 # JWT Inactivity Middleware 🔒
 
 [![NuGet](https://img.shields.io/nuget/v/JwtRefreshTokenRotation.svg)](https://www.nuget.org/packages/JwtRefreshTokenRotation)
-[![CI](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/JwtRefreshTokenRotation.V1/actions/workflows/ci.yml)
+[![CI](https://github.com/Abu-Habibah/TokenSharp/actions/workflows/ci.yml/badge.svg)](https://github.com/Abu-Habibah/TokenSharp/actions/workflows/ci.yml)
 [![License: AGPL v3](https://img.shields.io/badge/License-AGPL_v3-blue.svg)](https://www.gnu.org/licenses/agpl-3.0)
 
 ## ⚠️ Deprecation Notice
@@ -10,12 +10,15 @@ The NuGet package `JwtRefreshTokenRotation` will be renamed to `TokenMiddleware`
 - Please migrate to `TokenMiddleware` for future updates.
 
 
-**JWT Inactivity Middleware** is a reusable ASP.NET Core package that enforces inactivity thresholds on JWT bearer tokens.  
+## 🤹‍♂️ Token Middleware
+Is a reusable ASP.NET Core package that enforces inactivity thresholds on JWT bearer tokens or Session token.  
 Unlike standard JWT expiration (`exp`), this middleware tracks *last access time* in Redis and rejects tokens that exceed a configurable inactivity window.
 
 ---
 
 ## ✨ Features
+- **Session Based Token**: Tokens are tied to user sessions stored in Redis, allowing for centralized session management and invalidation.
+- **JWT Barier Token**: Leverages standard JWT tokens with added `jti` claim for unique identification.
 - **Inactivity threshold enforcement**: Reject tokens idle longer than the configured duration.  
 - **Redis-backed tracking**: Distributed cache ensures consistency across multiple API instances.  
 - **Sliding expiration**: Active tokens remain valid as long as they’re used within the threshold.  
@@ -52,6 +55,7 @@ builder.Services.AddRateLimiter(new LimitingOptions
     }
 });
 
+// for JWT bearer token based authentication
 builder.Services.AddJwtTokenRotation(new JwtTokenRotationOptions
 {
     InactivityThreshold = 10,
@@ -59,6 +63,9 @@ builder.Services.AddJwtTokenRotation(new JwtTokenRotationOptions
     //RedisConnectionString = "localhost:6379",
     JwtSecret = "YourSuperSecretKeyHere"
 });
+
+builder.Services.AddSessionTokens(); // For session based authentication
+
 
 var app = builder.Build();
 
@@ -69,7 +76,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseRateLimitingMiddleware();
-app.UseJwtTokenRotation();
+
+//choose only one of the below middlewares
+app.UseJwtTokenRotation(); //<-- you may choose to use JWT bearer token
+app.UseSessionAuthentication(); // <-- or session based authentication
 ````
 ---
 ## 🔒Best Practices
@@ -94,31 +104,40 @@ Contributions are welcome!
 
 ## 🛠 Project Structure
 ```csharp
-JwtTokenMiddleware/
+TokenMiddleware/
+    JwtTokenMiddleware.csproj                       # Library project file
+    GeneralConst.cs                                 # General constants
     RateLimiter/
-         ├── ILimitingOption.cs                 # Limiting option interface
-         ├── LimitingOptions.cs                 # Limiting options model
-         ├── LimitingPolicy.cs                  # Limiting policy model
-         ├── LimitingPolicyResolver.cs          # Limiting policy resolver
-         ├── RateLimitFallbackMode.cs           # Limiting fallback mode enum
-         ├── RateLimitingExtension.cs           # DI + middleware registration
-         ├── RateLimitingMiddleware.cs          # Middleware logic
+         ├── ILimitingOption.cs                     # Limiting option interface
+         ├── LimitingOptions.cs                     # Limiting options model
+         ├── LimitingPolicy.cs                      # Limiting policy model
+         ├── LimitingPolicyResolver.cs              # Limiting policy resolver
+         ├── RateLimitFallbackMode.cs               # Limiting fallback mode enum
+         ├── RateLimitingExtension.cs               # DI + middleware registration
+         ├── RateLimitingMiddleware.cs              # Middleware logic
      Redis/
-         ├── RedisConnectionExtention.cs        # DI registration for Redis IConnectionMultiplexer
-     TokenRotation/
-         ├── JwtTokenRotationMiddleware.cs      # Core middleware logic
-         ├── JwtTokenRotationOptions.cs         # Configurable options
-         ├── JwtTokenGenerator.cs               # Token generator service
-         ├── JwtTokenRotationExtension.cs       # DI + middleware registration
-         ├── JwtTokenMiddleware.csproj          # Library project file
-
+         ├── RedisConnectionExtention.cs            # DI registration for Redis IConnectionMultiplexer
+     JwtToken/  
+         ├── JwtTokenRotationMiddleware.cs          # Core middleware logic
+         ├── JwtTokenRotationOptions.cs             # Configurable options
+         ├── JwtTokenGenerator.cs                   # Token generator service
+         ├── JwtTokenRotationExtension.cs           # DI + middleware registration        
+     SessionToken/
+         ├── ISessionService.cs                     # Session service contract
+         ├── RedisSessionService.cs                 # Redis backed session service
+         ├── SessionAuthenticationMiddleware.cs     # Middleware logic
+         ├── SessionExtensions.cs                   # DI + middleware registration
+         ├── SessionPayload.cs                      # Session payload model
 JwtTokenMiddleware.Sample/
- ├── Program.cs                                 # Demo API setup
- ├── Controllers/AuthController.cs              # Example login + token issuance
+ ├── Program.cs                                     # Demo API setup
+ ├── Controllers/AuthController.cs                  # Example login + token issuance
  ├── JwtTokenMiddleware.Sample.csproj
 
 JwtTokenMiddleware.Test/
- ├── JwtTokenRotationMiddlewareTests.cs         # Unit tests for inactivity logic
+ ├── JwtTokenRotationMiddlewareTests.cs             # Unit tests for JWT middleware
+ ├── RateLimitingMiddlewareTests.cs                 # Unit tests for rate limiting logic
+ ├── SessionAuthenticationMiddlewareTests.cs        # Unit tests for session middleware
+ ├── SessionServiceTests.cs                         # Unit tests for session service
  ├── JwtTokenMiddleware.Test.csproj
 ```
 ----
@@ -153,6 +172,9 @@ User                AuthController          JwtTokenGenerator        Redis      
 ```
 ---
 ## 📝 Change Log
+    🏷️ 2.1.0 
+        - Added session based token.
+
     🏷️ 2.0.0 
         - Update 'fix window' rate limiter feature.
         - Redis server is now configurable via RedisConnectionExtension or you may register
