@@ -15,7 +15,7 @@ jobs:
         with:
           dotnet-version: '10.0.x'
       - run: dotnet restore
-      - run: dotnet build TokenSharp/TokenSharp.csproj --configuration Release
-      - run: dotnet pack TokenSharp/TokenSharp.csproj --configuration Release -o ./artifacts
+      - run: dotnet build TokenMiddleware/TokenMiddleware.csproj --configuration Release
+      - run: dotnet pack TokenMiddleware/TokenMiddleware.csproj --configuration Release -o ./artifacts
       - run: dotnet nuget push ./artifacts/**/*.nupkg --api-key ${{ secrets.NUGET_API_KEY }} --source https://api.nuget.org/v3/index.json --skip-duplicate
       - run: dotnet nuget push ./artifacts/**/*.nupkg --api-key ${{ secrets.GH_PUBLISH_PACKAGE }} --source "https://nuget.pkg.github.com/Abu-Habibah/index.json" --skip-duplicate
